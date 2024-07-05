@@ -241,8 +241,7 @@ def check_devices(devices:List[Device]):
     
     if time_diff_hours and time_diff_hours > 24:
         send_email("Smartctl notifier alive email message", "Smartctl notifier alive email message")
-    
-    write_last_nofy_alive_date(last_notify_path)
+        write_last_nofy_alive_date(last_notify_path)
  
 
     for dev in devices:
