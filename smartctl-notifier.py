@@ -5,6 +5,10 @@ from typing import List
 from datetime import datetime
 import pathlib
 
+storage_path = "./.smartctl-notifier-storage"
+email_credential_path = storage_path+"/email_credential"
+email_credentials = []
+
 class Device:
     def __init__(self, path:str) -> None:
         self.path = path
@@ -123,12 +127,16 @@ def get_devices() -> List[Device]:
             print(f"found {device_string}")
             devices.append(Device(device_string))
         else:
-            print("Device string not found.")
+            print(f"Device {device_string} string not found.")
         
     return devices
 
+def write_last_nofy_alive_date(filename):
+    with open(filename, 'a') as file:
+        dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+        file.write(f"{dt}\n") # Write the text to the file
 
-def get_last_notify_date(filename) -> datetime:
+def get_last_nofy_alive_date(filename) -> datetime:
     try:
         with open(filename, 'r') as file:
             content = file.read().strip()  # Read entire content and strip any extra whitespace
@@ -140,13 +148,13 @@ def get_last_notify_date(filename) -> datetime:
             converted_date = datetime.strptime(last_string, date_format)
             return converted_date
     except FileNotFoundError:
-        print(f"File not found")
+        print(f"Last notify date file {filename} not found")
         return None
     except Exception as e:
         print(f"Error: {e}")
         return None
     
-def get_last_notify_date(filename) -> str:
+def get_last_attribute_value(filename) -> str:
     try:
         with open(filename, 'r') as file:
             content = file.read().strip()  # Read entire content and strip any extra whitespace
@@ -156,11 +164,59 @@ def get_last_notify_date(filename) -> str:
             last_string = strings[-1]  # Get the last string
             return last_string.split(':', 1)[1].strip()
     except FileNotFoundError:
-        print(f"File not found")
+        print(f"Attribute file {filename} not found")
         return None
     except Exception as e:
         print(f"Error: {e}")
         return None
+    
+
+
+def send_email(subject:str, text:str):
+    print("Sending email")
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+
+    creds = get_email_credentials()
+    # Email configuration
+    sender_email = creds[0]
+    receiver_email = sender_email
+    password = creds[1]
+    
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = sender_email
+    msg['To'] = receiver_email
+
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(text, 'plain')
+    # Attach parts into the message container
+    msg.attach(part1)
+    # Send the email (assuming SMTP server is configured)
+    try:
+        with smtplib.SMTP_SSL('smtp.mail.ru', 465) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Failed to send email. Error: {str(e)}")
+
+def check_requirements():
+    pathlib.Path(storage_path).mkdir(parents=True, exist_ok=True)
+    if not os.path.exists(email_credential_path):
+        open(email_credential_path, 'a').close()
+        print(f"File '{email_credential_path}' created successfully")
+        exit()
+
+        
+def get_email_credentials():
+    email_credentials = read_file(email_credential_path)
+    if len(email_credentials) < 2:
+        print(f"File '{email_credential_path}' credentials doesn't contain two lines")
+        exit()
+    return email_credentials
     
 warning_attributes = ["Critical Warning", "Percentage Used", 
                     "Available Spare", "Unsafe Shutdowns", 
@@ -172,23 +228,31 @@ warning_attributes = ["Critical Warning", "Percentage Used",
                     "Current_Pending_ECC_Cnt", "Offline_Uncorrectable",
                     "UDMA_CRC_Error_Count", "Percent_Lifetime_Remain",
                     "Write_Error_Rate", ]
-              
+
+                     
               
 def check_devices(devices:List[Device]):
-    storage = "./smartctl-notifier-storage"
-    last_notify_date = get_last_notify_date(f"{storage}/last-notify")
-    time_diff_hours = (datetime.now() - last_notify_date).total_seconds() / 3600
-    if time_diff_hours > 24:
-        pass
+    last_notify_path = f"{storage_path}/last-notify"
+    last_notify_date = get_last_nofy_alive_date (last_notify_path)
+    if last_notify_date:
+        time_diff_hours = (datetime.now() - last_notify_date).total_seconds() / 3600
+    else:
+        time_diff_hours = None
     
+    if time_diff_hours and time_diff_hours > 24:
+        send_email("Smartctl notifier alive email message", "Smartctl notifier alive email message")
+    
+    write_last_nofy_alive_date(last_notify_path)
+ 
+
     for dev in devices:
-        dev_stor_path = f'{storage}/{dev.get_device_file_name()}'
+        dev_stor_path = f'{storage_path}/{dev.get_device_file_name()}'
         pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
         changed_attributes = []
         changed_warning_attributes = []
         for attr in dev.get_attributes():
             filename = f"{dev_stor_path}/{attr[0]}"
-            last_value = get_last_notify_date(filename)
+            last_value = get_last_attribute_value(filename)
             
             if last_value and last_value != attr[1]:
                 if any(value in attr[0] for value in warning_attributes):
@@ -199,11 +263,18 @@ def check_devices(devices:List[Device]):
             with open(filename, 'a') as file:
                 dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
                 file.write(f"{dt}:  {attr[1]}\n") # Write the text to the file
-
+              
+        message = ""  
         if len(changed_warning_attributes)>0:
-            print (f"WARNING Device {dev.path} ERROR-attributes have changed ! ! !")
+            msg = f"WARNING Device {dev.path} ERROR attributes have changed ! ! !"
+            print (msg) 
+            message += msg + '\n' 
             for attr in changed_warning_attributes:
-                print (f"Attribute {attr[0]} has changed from {attr[1]} to {attr[2]}")   
+                msg = f"Attribute {attr[0]} has changed from {attr[1]} to {attr[2]}"
+                print (msg) 
+                message += msg + '\n'  
+            send_email("WARNING", message)       
+                
         elif len(changed_attributes)>0:
             print(f"Device {dev.path} attributes have changed:")
             for attr in changed_attributes:
@@ -212,9 +283,12 @@ def check_devices(devices:List[Device]):
 
 def main():
     devices = get_devices()
+    check_requirements()
     check_devices(devices)
 
 def test():   
+    check_requirements()
+    
     dev_hdd = Device('test')
     dev_hdd._Device__filename = "test1"
     dev_hdd.set_attributes(read_file('attributes-example.txt'))
