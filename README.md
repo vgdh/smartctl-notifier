@@ -4,7 +4,7 @@ This tool helps you monitor your HDD or NVMe disk for changes in SMART values, i
 
 ## How to Use
 
-1. Clone the repository:
+1. You need only smartctl-notifier.py file. Or you can clone the repository:
     ```bash
     cd /root/
     git clone https://github.com/vgdh/smartctl-notifier
