@@ -221,7 +221,7 @@ def get_email_credentials():
 warning_attributes = ["Critical Warning", "Percentage Used", 
                     "Available Spare", "Unsafe Shutdowns", 
                     "Warning", "Critical",
-                    "Raw_Read_Error_Rate", "Reallocate_NAND_Blk_Cnt",
+                    "Reallocate_NAND_Blk_Cnt",
                     "Program_Fail_Count", "Erase_Fail_Count",
                     "Unexpect_Power_Loss_Ct","Error_Correction_Count",
                     "Reported_Uncorrect", "Reallocated_Event_Count",
