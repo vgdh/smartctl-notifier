@@ -209,7 +209,7 @@ def check_requirements():
         open(email_credential_path, 'a').close()
         print(f"File '{email_credential_path}' created successfully")
         exit()
-
+    _ = get_email_credentials()
         
 def get_email_credentials():
     email_credentials = read_file(email_credential_path)
