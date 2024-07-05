@@ -3,6 +3,7 @@ import subprocess
 import re
 from typing import List
 from datetime import datetime
+import pathlib
 
 class Device:
     def __init__(self, path:str) -> None:
@@ -131,8 +132,8 @@ def main():
     devices = get_devices()
     for dev in devices:
         dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
-        if os.path.exists (dev_stor_path) is False and os.path.isdir(dev_stor_path) is False:
-            os.mkdir(dev_stor_path)
+        pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
+
         for attr in dev.get_attributes():
             with open(f"{dev_stor_path}/{attr[0]}", 'a') as file:
                 dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
