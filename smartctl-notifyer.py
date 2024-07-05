@@ -135,8 +135,8 @@ def main():
             os.mkdir(dev_stor_path)
         for attr in dev.get_attributes():
             with open(f"{dev_stor_path}/{attr[0]}", 'a') as file:
-                datetime = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
-                file.write(f"{datetime}:  {attr[1]}\n") # Write the text to the file
+                dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+                file.write(f"{dt}:  {attr[1]}\n") # Write the text to the file
         
         
     # dev_hdd = Device('test')
