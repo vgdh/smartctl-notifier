@@ -130,7 +130,7 @@ def get_devices() -> List[Device]:
 def main():
     devices = get_devices()
     for dev in devices:
-        dev_stor_path = f'./{dev.get_device_file_name()}'
+        dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
         if os.path.exists (dev_stor_path) is False and os.path.isdir(dev_stor_path) is False:
             os.mkdir(dev_stor_path)
         for attr in dev.get_attributes():
