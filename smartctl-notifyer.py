@@ -134,7 +134,7 @@ def get_last_file_string_value(filename) -> str:
             content = file.read().strip()  # Read entire content and strip any extra whitespace
             if not content:
                 return "No previous value"  # Handle case where file is empty
-            strings = content.split()  # Split content into strings
+            strings = content.split('\n')  # Split content into strings
             last_string = strings[-1]  # Get the last string
             return last_string.split(':', 1)[1].strip()
     except FileNotFoundError:
