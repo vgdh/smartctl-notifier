@@ -128,16 +128,43 @@ def get_devices() -> List[Device]:
     return devices
 
 
+def get_last_file_string_value(filename) -> str:
+    try:
+        with open(filename, 'r') as file:
+            content = file.read().strip()  # Read entire content and strip any extra whitespace
+            if not content:
+                return "No previous value"  # Handle case where file is empty
+            strings = content.split()  # Split content into strings
+            last_string = strings[-1]  # Get the last string
+            return last_string.split(':', 1)[1].strip()
+    except FileNotFoundError:
+        print(f"File not found")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    
 def main():
     devices = get_devices()
     for dev in devices:
         dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
         pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
-
+        changed_attributes_text = []
         for attr in dev.get_attributes():
-            with open(f"{dev_stor_path}/{attr[0]}", 'a') as file:
+            filename = f"{dev_stor_path}/{attr[0]}"
+            last_value = get_last_file_string_value(filename)
+            if last_value and last_value != attr[1]:
+                changed_attributes_text.append(f"Attrubute {attr[0]} has changed forom {last_value} to {attr[1]}")
+            with open(filename, 'a') as file:
                 dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
                 file.write(f"{dt}:  {attr[1]}\n") # Write the text to the file
+        
+        if len(changed_attributes_text)>0:
+            print(f"In device {dev.__path} attributes have changed:")
+            for attr in changed_attributes_text:
+                print (attr)
+        
+        
         
         
     # dev_hdd = Device('test')
