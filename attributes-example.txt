@@ -6,16 +6,16 @@ SMART Attributes Data Structure revision number: 16
 Vendor Specific SMART Attributes with Thresholds:
 ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
   1 Raw_Read_Error_Rate     0x002f   100   100   000    Pre-fail  Always       -       0
-  5 Reallocate_NAND_Blk_Cnt 0x0032   100   100   010    Old_age   Always       -       0
+  5 Reallocate_NAND_Blk_Cnt 0x0032   100   100   010    Old_age   Always       -       1
   9 Power_On_Hours          0x0032   100   100   000    Old_age   Always       -       41609
- 12 Power_Cycle_Count       0x0032   100   100   000    Old_age   Always       -       1529
+ 12 Power_Cycle_Count       0x0032   100   100   000    Old_age   Always       -       1533
 171 Program_Fail_Count      0x0032   100   100   000    Old_age   Always       -       0
 172 Erase_Fail_Count        0x0032   100   100   000    Old_age   Always       -       0
 173 Ave_Block-Erase_Count   0x0032   087   087   000    Old_age   Always       -       396
 174 Unexpect_Power_Loss_Ct  0x0032   100   100   000    Old_age   Always       -       879
 180 Unused_Reserve_NAND_Blk 0x0033   000   000   000    Pre-fail  Always       -       2596
 183 SATA_Interfac_Downshift 0x0032   100   100   000    Old_age   Always       -       41
-184 Error_Correction_Count  0x0032   100   100   000    Old_age   Always       -       0
+184 Error_Correction_Count  0x0032   100   100   000    Old_age   Always       -       1
 187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
 194 Temperature_Celsius     0x0022   052   044   000    Old_age   Always       -       48 (Min/Max 18/56)
 196 Reallocated_Event_Count 0x0032   100   100   000    Old_age   Always       -       0

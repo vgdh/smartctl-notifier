@@ -57,7 +57,7 @@ class Device:
         separation_end_indexes = []
         in_separation_now = False
         for char_id in range(len(string)):
-            if string[char_id] is " ":
+            if string[char_id] == " ":
                 in_separation_now = True
             elif in_separation_now is True:
                 in_separation_now = False
@@ -128,7 +128,25 @@ def get_devices() -> List[Device]:
     return devices
 
 
-def get_last_file_string_value(filename) -> str:
+def get_last_notify_date(filename) -> datetime:
+    try:
+        with open(filename, 'r') as file:
+            content = file.read().strip()  # Read entire content and strip any extra whitespace
+            if not content:
+                return "No previous value"  # Handle case where file is empty
+            strings = content.split('\n')  # Split content into strings
+            last_string = strings[-1]  # Get the last string
+            date_format = "%Y.%m.%d-%H.%M.%S"
+            converted_date = datetime.strptime(last_string, date_format)
+            return converted_date
+    except FileNotFoundError:
+        print(f"File not found")
+        return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    
+def get_last_notify_date(filename) -> str:
     try:
         with open(filename, 'r') as file:
             content = file.read().strip()  # Read entire content and strip any extra whitespace
@@ -144,41 +162,78 @@ def get_last_file_string_value(filename) -> str:
         print(f"Error: {e}")
         return None
     
-def main():
-    devices = get_devices()
+warning_attributes = ["Critical Warning", "Percentage Used", 
+                    "Available Spare", "Unsafe Shutdowns", 
+                    "Warning", "Critical",
+                    "Raw_Read_Error_Rate", "Reallocate_NAND_Blk_Cnt",
+                    "Program_Fail_Count", "Erase_Fail_Count",
+                    "Unexpect_Power_Loss_Ct","Error_Correction_Count",
+                    "Reported_Uncorrect", "Reallocated_Event_Count",
+                    "Current_Pending_ECC_Cnt", "Offline_Uncorrectable",
+                    "UDMA_CRC_Error_Count", "Percent_Lifetime_Remain",
+                    "Write_Error_Rate", ]
+              
+              
+def check_devices(devices:List[Device]):
+    storage = "./smartctl-notifier-storage"
+    last_notify_date = get_last_notify_date(f"{storage}/last-notify")
+    time_diff_hours = (datetime.now() - last_notify_date).total_seconds() / 3600
+    if time_diff_hours > 24:
+        pass
+    
     for dev in devices:
-        dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
+        dev_stor_path = f'{storage}/{dev.get_device_file_name()}'
         pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
-        changed_attributes_text = []
+        changed_attributes = []
+        changed_warning_attributes = []
         for attr in dev.get_attributes():
             filename = f"{dev_stor_path}/{attr[0]}"
-            last_value = get_last_file_string_value(filename)
+            last_value = get_last_notify_date(filename)
+            
             if last_value and last_value != attr[1]:
-                changed_attributes_text.append(f"Attrubute {attr[0]} has changed forom {last_value} to {attr[1]}")
+                if any(value in attr[0] for value in warning_attributes):
+                    changed_warning_attributes.append((attr[0],last_value, attr[1]))
+                else:
+                    changed_attributes.append((attr[0],last_value, attr[1]))
+                    
             with open(filename, 'a') as file:
                 dt = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
                 file.write(f"{dt}:  {attr[1]}\n") # Write the text to the file
-        
-        if len(changed_attributes_text)>0:
-            print(f"In device {dev.path} attributes have changed:")
-            for attr in changed_attributes_text:
-                print (attr)
-        
-        
-        
-        
-    # dev_hdd = Device('test')
-    # dev_hdd.set_attributes(read_file('attributes-example.txt'))
-    # dev_hdd_val = dev_hdd.get_attribute('cels')
-    # dev_hdd_val1 = dev_hdd.get_attributes()
+
+        if len(changed_warning_attributes)>0:
+            print (f"WARNING Device {dev.path} ERROR-attributes have changed ! ! !")
+            for attr in changed_warning_attributes:
+                print (f"Attribute {attr[0]} has changed from {attr[1]} to {attr[2]}")   
+        elif len(changed_attributes)>0:
+            print(f"Device {dev.path} attributes have changed:")
+            for attr in changed_attributes:
+                print (f"Attribute {attr[0]} has changed from {attr[1]} to {attr[2]}")   
+            
+
+def main():
+    devices = get_devices()
+    check_devices(devices)
+
+def test():   
+    dev_hdd = Device('test')
+    dev_hdd._Device__filename = "test1"
+    dev_hdd.set_attributes(read_file('attributes-example.txt'))
+    dev_hdd_val1 = dev_hdd.get_attributes()
+    dev_hdd_val = dev_hdd.get_attribute('cels')
     
-    # dev_nvme = Device('nvme')
-    # dev_nvme.set_attributes(read_file('attributes-example-nvme.txt'))
-    # dev_nvme_val1 = dev_nvme.get_attributes()
-    # dev_nvme_val = dev_nvme.get_attribute('cels')
+    dev_nvme = Device('nvme')
+    dev_nvme._Device__filename = "test2"
+    dev_nvme.set_attributes(read_file('attributes-example-nvme.txt'))
+    dev_nvme_val1 = dev_nvme.get_attributes()
+    dev_nvme_val = dev_nvme.get_attribute('cels')
+    
+    dev_list =[dev_hdd, dev_nvme]
+    check_devices(dev_list)
     
 
 if __name__ == "__main__":
-    main()
+    test()
+    # main()
+    
 
     
