@@ -7,7 +7,7 @@ import pathlib
 
 class Device:
     def __init__(self, path:str) -> None:
-        self.__path = path
+        self.path = path
         self.__attributes = None
         self.__filename = None
 
@@ -31,7 +31,7 @@ class Device:
         for attr in self.__attributes:
             name = None
             value = None
-            if "nvme" in self.__path:
+            if "nvme" in self.path:
                 name = attr.split(':', 1)[0].strip()
                 value = attr.split(':', 1)[1].strip()
             else:
@@ -50,7 +50,7 @@ class Device:
         return None 
 
     def update_attributes(self):
-        attr = run_command(['smartctl', '--attributes', self.__path])
+        attr = run_command(['smartctl', '--attributes', self.path])
         self.set_attributes(attr)
 
     def find_value_after_separation(self, string:str, separation_num:int):
@@ -76,7 +76,7 @@ class Device:
         if self.__filename:
             return self.__filename 
         
-        info = run_command(['smartctl', '-i', self.__path])
+        info = run_command(['smartctl', '-i', self.path])
         name = None
         sn = None
         for line in info:
@@ -147,7 +147,6 @@ def get_last_file_string_value(filename) -> str:
 def main():
     devices = get_devices()
     for dev in devices:
-        print(dev.__path)
         dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
         pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
         changed_attributes_text = []
@@ -161,7 +160,7 @@ def main():
                 file.write(f"{dt}:  {attr[1]}\n") # Write the text to the file
         
         if len(changed_attributes_text)>0:
-            print(f"In device {dev.__path} attributes have changed:")
+            print(f"In device {dev.path} attributes have changed:")
             for attr in changed_attributes_text:
                 print (attr)
         
