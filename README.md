@@ -34,5 +34,8 @@ This tool helps you monitor your HDD or NVMe disk for changes in SMART values, i
     ```bash
     0 * * * * cd /root/smartctl-notifier/ && python3 smartctl-notifier.py
     ```
-
+    If you use proxmox redirect standart output to null, or you will be receiving too much email with standart output
+    ```bash
+    0 * * * * cd /root/smartctl-notifier/ && python3 smartctl-notifier.py > /dev/null
+    ```
 ---
