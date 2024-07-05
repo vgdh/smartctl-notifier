@@ -36,5 +36,3 @@ This tool helps you monitor your HDD or NVMe disk for changes in SMART values, i
     ```
 
 ---
-
-This version addresses grammatical issues, corrects typos (e.g., "notifyer" to "notifier"), and improves the overall flow and readability.
