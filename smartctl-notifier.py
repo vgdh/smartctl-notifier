@@ -54,7 +54,7 @@ class Device:
         return None 
 
     def update_attributes(self):
-        attr = run_command(['smartctl', '--attributes', self.path])
+        attr = run_command(['/usr/sbin/smartctl', '--attributes', self.path])
         self.set_attributes(attr)
 
     def find_value_after_separation(self, string:str, separation_num:int):
@@ -80,7 +80,7 @@ class Device:
         if self.__filename:
             return self.__filename 
         
-        info = run_command(['smartctl', '-i', self.path])
+        info = run_command(['/usr/sbin/smartctl', '-i', self.path])
         name = None
         sn = None
         for line in info:
@@ -118,7 +118,7 @@ def read_file(path:str):
 
 
 def get_devices() -> List[Device]:
-    smartctl_scan_output = run_command(['smartctl', '--scan'])
+    smartctl_scan_output = run_command(['/usr/sbin/smartctl', '--scan'])
     devices = []
     for line in smartctl_scan_output:
         match = re.search(r'(/dev/\S+)', line)
