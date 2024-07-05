@@ -147,6 +147,7 @@ def get_last_file_string_value(filename) -> str:
 def main():
     devices = get_devices()
     for dev in devices:
+        print(dev.__path)
         dev_stor_path = f'./smartctl-notifyer-storage/{dev.get_device_file_name()}'
         pathlib.Path(dev_stor_path).mkdir(parents=True, exist_ok=True)
         changed_attributes_text = []
