@@ -2,7 +2,7 @@ import os
 import subprocess
 import re
 from typing import List
-
+from datetime import datetime
 
 class Device:
     def __init__(self, path:str) -> None:
@@ -134,23 +134,21 @@ def main():
         if os.path.exists (dev_stor_path) is False and os.path.isdir(dev_stor_path) is False:
             os.mkdir(dev_stor_path)
         for attr in dev.get_attributes():
-            with open(f"{dev_stor_path}/{att}", 'a') as file:
-                # Write the text to the file
-                file.write(text_to_append + '\n')
+            with open(f"{dev_stor_path}/{attr[0]}", 'a') as file:
+                datetime = datetime.now().strftime("%Y.%m.%d-%H.%M.%S")
+                file.write(f"{datetime}:  {attr[1]}\n") # Write the text to the file
         
         
-    dev_hdd = Device('test')
-    dev_hdd.set_attributes(read_file('attributes-example.txt'))
-    dev_hdd_val = dev_hdd.get_attribute('cels')
-    dev_hdd_val1 = dev_hdd.get_attributes()
+    # dev_hdd = Device('test')
+    # dev_hdd.set_attributes(read_file('attributes-example.txt'))
+    # dev_hdd_val = dev_hdd.get_attribute('cels')
+    # dev_hdd_val1 = dev_hdd.get_attributes()
     
-    dev_nvme = Device('nvme')
-    dev_nvme.set_attributes(read_file('attributes-example-nvme.txt'))
-    dev_nvme_val1 = dev_nvme.get_attributes()
-    dev_nvme_val = dev_nvme.get_attribute('cels')
+    # dev_nvme = Device('nvme')
+    # dev_nvme.set_attributes(read_file('attributes-example-nvme.txt'))
+    # dev_nvme_val1 = dev_nvme.get_attributes()
+    # dev_nvme_val = dev_nvme.get_attribute('cels')
     
-    print (devices)
-
 
 if __name__ == "__main__":
     main()

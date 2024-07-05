@@ -1,0 +1,21 @@
+smartctl 7.3 2022-02-28 r5338 [x86_64-linux-6.8.8-2-pve] (local build)
+Copyright (C) 2002-22, Bruce Allen, Christian Franke, www.smartmontools.org
+
+=== START OF INFORMATION SECTION ===
+Model Family:     Crucial/Micron Client SSDs
+Device Model:     Crucial_CT250MX200SSD1
+Serial Number:    1614123F1AB7
+LU WWN Device Id: 5 00a075 1123f1ab7
+Firmware Version: MU04
+User Capacity:    250,059,350,016 bytes [250 GB]
+Sector Sizes:     512 bytes logical, 4096 bytes physical
+Rotation Rate:    Solid State Device
+Form Factor:      2.5 inches
+TRIM Command:     Available, deterministic, zeroed
+Device is:        In smartctl database 7.3/5319
+ATA Version is:   ACS-3 T13/2161-D revision 4
+SATA Version is:  SATA 3.2, 6.0 Gb/s (current: 6.0 Gb/s)
+Local Time is:    Fri Jul  5 15:02:11 2024 +05
+SMART support is: Available - device has SMART capability.
+SMART support is: Enabled
+
