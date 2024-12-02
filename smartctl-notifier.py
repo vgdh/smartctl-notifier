@@ -280,10 +280,29 @@ def check_devices(devices:List[Device]):
                 print (f"Attribute {attr[0]} has changed from {attr[1]} to {attr[2]}")   
             
 
+def attribute_history_rotation(folder_path):
+    for root, _, files in os.walk(folder_path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, 'r') as f:
+                    lines = f.readlines()
+                
+                if len(lines) > 1000:
+                    with open(file_path, 'w') as f:
+                        f.writelines(lines[-1000:])
+                    #print(f"Trimmed {file_path} to the last 1000 lines.")
+
+            except Exception as e:
+                print(f"Failed to process {file_path}: {e}")
+
+
+
 def main():
     devices = get_devices()
     check_requirements()
     check_devices(devices)
+    attribute_history_rotation(storage_path)
 
 def test():   
     check_requirements()
